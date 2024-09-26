@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Right-to-Left Slider with Smooth Transitions (jQuery)</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Basic styling for slider */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            height: 50px;
+            border: 1px solid #ddd;
+        }
+
+        .slider {
+            position: absolute;
+            white-space: nowrap;
+            display: flex;
+        }
+
+        .slider-item {
+            display: inline-block;
+            margin-right: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        /* Transition out smoothly when removed */
+        .slider-item.removed {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container for the sliding elements -->
+    <div class="slider-container">
+        <div class="slider" id="slider"></div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const slider = $('#slider');
+            const sliderSpeed = 10000; // Speed of the sliding movement (time to cross the viewport in ms)
+
+            // Function to create a new slider item
+            function createSliderItem(clientCode, symbolName, executionQty, price) {
+                const item = $('<div></div>')
+                    .addClass('slider-item')
+                    .text(`Client: ${clientCode}, Symbol: ${symbolName}, Qty: ${executionQty}, Price: ${price}`);
+
+                slider.append(item);
+
+                // Start moving the item from right to left
+                moveSliderItem(item);
+            }
+
+            // Function to move the slider item from right to left using jQuery animation
+            function moveSliderItem(item) {
+                const sliderContainerWidth = $('.slider-container').width();
+                const itemWidth = item.outerWidth();
+
+                // Set the initial position off-screen (to the right)
+                item.css({ left: sliderContainerWidth });
+
+                // Animate the item to move it left
+                item.animate(
+                    { left: -itemWidth }, // Move to the left off the container
+                    {
+                        duration: sliderSpeed, // Duration for the entire animation (adjust as needed)
+                        easing: 'linear', // Smooth linear movement
+                        complete: function () {
+                            // Once it's completely out of the viewport, fade it out and remove it
+                            $(this).fadeOut(500, function () {
+                                $(this).remove();
+                            });
+                        }
+                    }
+                );
+            }
+
+            // Function to generate random data
+            function getRandomData() {
+                const clientCodes = ['ABC123', 'XYZ456', 'LMN789', 'PQR321', 'DEF654'];
+                const symbols = ['AAPL', 'TSLA', 'AMZN', 'GOOG', 'MSFT'];
+                const randomClientCode = clientCodes[Math.floor(Math.random() * clientCodes.length)];
+                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                const randomQty = Math.floor(Math.random() * 1000) + 1;  // Random quantity between 1 and 1000
+                const randomPrice = (Math.random() * 1000).toFixed(2);  // Random price between 0 and 1000
+
+                return {
+                    clientCode: randomClientCode,
+                    symbolName: randomSymbol,
+                    executionQty: randomQty,
+                    price: randomPrice
+                };
+            }
+
+            // Function to add random groups of data every 5 seconds
+            function addRandomData() {
+                setInterval(() => {
+                    // Random number of items to add (between 3 and 4)
+                    const numberOfItems = Math.floor(Math.random() * 2) + 1;
+
+                    for (let i = 0; i < numberOfItems; i++) {
+                        const { clientCode, symbolName, executionQty, price } = getRandomData();
+                        createSliderItem(clientCode, symbolName, executionQty, price);
+                    }
+                }, 2000); // Every 5 seconds
+            }
+
+            // Start adding random data
+            addRandomData();
+        });
+    </script>
+
+</body>
+</html>
